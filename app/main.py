@@ -27,6 +27,10 @@ transform = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,))
 ])
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 # --- API Endpoint ---
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
