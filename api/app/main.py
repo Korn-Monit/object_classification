@@ -3,11 +3,11 @@ from PIL import Image
 import io
 import torch
 import torchvision.transforms as transforms
-from app.mobilevit import MobileViT
+from mobilevit import MobileViT
 app = FastAPI()
 
 CLASS_NAMES = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
-MODEL_PATH = "models/mobilevit_xxs_cifar10.pth"
+MODEL_PATH = "api\models\mobilevit_xxs_cifar10.pth"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def mobilevit_xxs(num_classes=10):
     dims = [64, 80, 96]

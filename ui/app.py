@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 
-# Your FastAPI endpoint URL (replace with your Cloud Run URL)
 API_URL = "https://my-fastapi-app-225654315168.us-central1.run.app/predict"
 
 st.title("Image Classification with MobileViT")
