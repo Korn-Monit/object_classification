@@ -4,6 +4,10 @@ import requests
 API_URL = "https://my-fastapi-app-225654315168.us-central1.run.app/predict"
 
 st.title("Image Classification with MobileViT")
+st.markdown("""
+This model classifies images into 10 classes: airplane, automobile, bird, cat, deer, dog, frog, horse, ship, and truck.
+Upload an image to get a prediction.
+""")
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png"])
 
 if uploaded_file is not None:
