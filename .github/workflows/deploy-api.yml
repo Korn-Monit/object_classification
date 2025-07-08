@@ -39,7 +39,7 @@ jobs:
     - name: Build and Push Staging Image
       uses: docker/build-push-action@v4
       with:
-        context: .
+        context: ./api
         tags: |
           ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:staging-${{ github.sha }}
         push: true
