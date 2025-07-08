@@ -1,54 +1,61 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image
 import io
-import torch
-import torchvision.transforms as transforms
-from app.mobilevit import MobileViT
-app = FastAPI()
+import os
+from contextlib import asynccontextmanager
+from .model_loader import download_model_from_gcs, get_model
+from .mobilevit import transform
 
-CLASS_NAMES = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
-MODEL_PATH = "models/mobilevit_xxs_cifar10.pth"
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-def mobilevit_xxs(num_classes=10):
-    dims = [64, 80, 96]
-    channels = [16, 16, 24, 24, 48, 48, 64, 64, 80, 80, 320]
-    return MobileViT((32, 32), dims, channels, num_classes=num_classes, expansion=2, patch_size=(1,1))
-def load_model():
-    model = mobilevit_xxs(num_classes=10).to(DEVICE)
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
-    model.eval()
-    return model
+# Use a lifespan context manager for startup and shutdown events
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    print("Application startup...")
+    bucket_name = os.getenv("GCS_BUCKET_NAME")
+    model_blob_name = os.getenv("MODEL_BLOB_NAME")
 
-model = load_model()
+    if not bucket_name or not model_blob_name:
+        raise ValueError("GCS_BUCKET_NAME and MODEL_BLOB_NAME environment variables must be set")
 
-transform = transforms.Compose([
-    transforms.Resize((32, 32)),
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
-])
+    download_model_from_gcs(bucket_name, model_blob_name)
+    app.state.model = get_model()
+    print("Application startup complete.")
+    yield
+    # Shutdown logic (if any)
+    print("Application shutdown.")
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+def read_health():
+    """Health check endpoint to confirm the service is running."""
+    return {"status": "ok"}
 
-# --- API Endpoint ---
-@app.post("/predict")
+@app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
+    """Receives an image, processes it, and returns the model's prediction."""
+    if not app.state.model:
+        raise HTTPException(status_code=503, detail="Model is not loaded")
+
+    # Validate input file
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File provided is not an image.")
+
     try:
-        # Read and process image
-        image = Image.open(io.BytesIO(await file.read())).convert("RGB")
-        tensor = transform(image).unsqueeze(0).to(DEVICE)
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
         
-        # Inference
+        # Apply the same transformations as used during training
+        processed_image = transform(image).unsqueeze(0) # Add batch dimension
+        
+        # Make prediction
         with torch.no_grad():
-            outputs = model(tensor)
+            outputs = app.state.model(processed_image)
             _, predicted = torch.max(outputs, 1)
-        
-        return {
-            "class_id": predicted.item(),
-            "class_name": CLASS_NAMES[predicted.item()],
-            "confidence": torch.nn.functional.softmax(outputs, dim=1)[0][predicted.item()].item()
-        }
-    
+            # Replace with your actual class names
+            class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'] 
+            prediction = class_names[predicted.item()]
+
+        return {"prediction": prediction}
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=f"An error occurred during prediction: {str(e)}")

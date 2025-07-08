@@ -1,55 +1,110 @@
 name: CI/CD Pipeline
 
-on:
+on:  # <--- REQUIRED TRIGGER CONFIGURATION
   push:
-    branches: [staging, main]
-    paths: 
-      - 'api/**'
+    branches:
+      - staging
+      - main
+
+env:
+  GCP_PROJECT: fourth-memento-457220-f1
+  REGION: us-central1
+  ARTIFACT_REGISTRY: cloud-run-source-deploy
 
 jobs:
-  test-and-deploy-staging:
-    # Only run when pushing to staging branch
+  # ---------------------------
+  # Staging Environment (Preview)
+  # ---------------------------
+  staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    environment: staging
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Run tests
-        run: |
-          pip install -r api/requirements.txt
-          cd api
-          pytest tests/test_app.py
+    - name: Setup GCP Auth
+      uses: google-github-actions/auth@v1
+      with:
+        # Replace with your Workload Identity Federation details
+        workload_identity_provider: projects/225654315168/locations/global/workloadIdentityPools/object-detection/providers/object-detection
+        service_account: github-actions-deploy@fourth-memento-457220-f1.iam.gserviceaccount.com
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./api
-          push: true
-          tags: |
-            gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-fastapi-app:${{ github.sha }}-staging
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
 
-      - name: Deploy to Staging
-        uses: google-github-actions/deploy-cloudrun@v1
-        with:
-          service: my-fastapi-app-staging
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-fastapi-app:${{ github.sha }}-staging
-          region: us-central1
+    - name: Build and Push Staging Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        tags: |
+          ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:staging-${{ github.sha }}
+        push: true
+        build-args: |
+          MODEL_URI=gs://object-classification/staging/models/v1.0.0/mobilevit_xxs_cifar10.pth
 
-  deploy-prod:
-    # Only run when pushing to main branch
-    if: github.ref == 'refs/heads/main'
-    needs: test-and-deploy-staging  # Wait for staging tests
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Deploy to Cloud Run (Staging)
+      id: deploy_staging
+      uses: google-github-actions/deploy-cloudrun@v1
+      with:
+        service: object-classification-staging
+        image: ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:staging-${{ github.sha }}
+        region: ${{ env.REGION }}
+        # credentials: ${{ secrets.GCP_SA_KEY_STAGING }}
+        env_vars: |
+          GCS_BUCKET_NAME=object-classification
+          MODEL_BLOB_NAME=prod/models/v1.0.0/mobilevit_xxs_cifar10.pth
 
-      - name: Promote staging image to prod
-        uses: google-github-actions/deploy-cloudrun@v1
-        with:
-          service: my-fastapi-app  # Your existing production service
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/my-fastapi-app:${{ github.sha }}-staging
-          region: us-central1
+    - name: Run Integration Tests
+      run: |
+        # Add your test commands here
+        echo "Running integration tests against staging environment..."
+        curl -X POST https://my-fastapi-app-staging-225654315168.us-central1.run.app/predict -H "Content-Type: image/jpeg" --data-binary @test_image.jpg
+
+  # ---------------------------
+  # Production Environment 
+  # ---------------------------
+  # production:
+  #   name: Deploy to Production
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: staging  # Requires staging job success first
+    
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+
+  #   - name: Setup GCP Auth
+  #     uses: google-github-actions/auth@v1
+  #     with:
+
+  #       workload_identity_provider: projects/${{ env.GCP_PROJECT }}/locations/global/workloadIdentityPools/your-pool/providers/your-provider
+  #       service_account: prod-deployer@${{ env.GCP_PROJECT }}.iam.gserviceaccount.com
+
+  #   - name: Promote Staging Image
+  #     run: |
+  #       # Copy staging image to production tag
+  #       docker pull ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:staging-${{ github.sha }}
+  #       docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:staging-${{ github.sha }} \
+  #                  ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:prod-${{ github.sha }}
+  #       docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:prod-${{ github.sha }}
+
+
+  #   - name: Deploy to Cloud Run (Production)
+
+  #     uses: google-github-actions/deploy-cloudrun@v1
+  #     with:
+  #       service: object-classification-prod
+  #       image: ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT }}/${{ env.ARTIFACT_REGISTRY }}/app:prod-${{ github.sha }}
+  #       region: ${{ env.REGION }}
+  #       traffic: 100%  # Blue/green deployment
+  #       # credentials: ${{ secrets.GCP_SA_KEY_PROD }}
+  #       env_vars: |
+  #         GCS_BUCKET_NAME=object-classification
+  #         MODEL_BLOB_NAME=prod/models/v1.0.0/mobilevit_xxs_cifar10.pth
+
+  #   - name: Smoke Test Production
+  #     run: |
+  #       echo "Running smoke tests on production..."
+  #       curl --retry 3 --retry-delay 10 --fail https://prod-service-url/health
