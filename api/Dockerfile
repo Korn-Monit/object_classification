@@ -12,11 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY api/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
 
 # Copy only the application code, not the whole project
-COPY --chown=appuser:appuser api/app /app/app
+COPY --chown=appuser:appuser app /app/app
 
 # Switch to the non-root user
 USER appuser
