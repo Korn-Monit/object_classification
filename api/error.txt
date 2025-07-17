@@ -1,6 +1,3 @@
-#12 ERROR: failed to push us-central1-docker.pkg.dev/fourth-memento-457220-f1/cloud-run-source-deploy/app:staging-101773e22622d2436a6831dada8b1607835d80fe: error getting credentials - err: exit status 1, out: ``
-------
- > exporting to image:
-------
-ERROR: failed to build: failed to solve: error getting credentials - err: exit status 1, out: ``
-Error: buildx failed with: ERROR: failed to build: failed to solve: error getting credentials - err: exit status 1, out: ``
+Nested mappings are not allowed in compact mappings at line 30, column 12:
+
+      run: echo "Repository name is: ${{ github.repository }}"
