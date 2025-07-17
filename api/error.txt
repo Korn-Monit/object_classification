@@ -1,15 +1,9 @@
-Run gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
-ERROR: (gcloud.auth.print-access-token) There was a problem refreshing your current auth tokens: ('Unable to acquire impersonated credentials', '{\n  "error": {\n    "code": 403,\n    "message": "Permission \'iam.serviceAccounts.getAccessToken\' denied on resource (or it may not exist).",\n    "status": "PERMISSION_DENIED",\n    "details": [\n      {\n        "@type": "type.googleapis.com/google.rpc.ErrorInfo",\n        "reason": "IAM_PERMISSION_DENIED",\n        "domain": "iam.googleapis.com",\n        "metadata": {\n          "permission": "iam.serviceAccounts.getAccessToken"\n        }\n      }\n    ]\n  }\n}\n')
-Please run:
-
-  $ gcloud auth login
-
-to obtain new credentials.
-
-If you have already logged in with a different account, run:
-
-  $ gcloud config set account ACCOUNT
-
-to select an already authenticated account to use.
-Error: Cannot perform an interactive login from a non TTY device
-Error: Process completed with exit code 1.
+Run google-github-actions/deploy-cloudrun@v1
+/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f7f2cbde-0b37-4e3e-9a3d-7183c0768ed1 -f /home/runner/work/_temp/3284de81-4d4d-4614-b20c-85ca0dabcf7f
+Successfully authenticated
+Running: gcloud run deploy object-classification-staging --quiet --image us-central1-docker.pkg.dev/fourth-memento-457220-f1/cloud-run-source-deploy/app:staging-b980baf3114ecc8081cb1b0d11bc43485858e8d4 --update-env-vars GCS_BUCKET_NAME=object-classification,MODEL_BLOB_NAME=prod/models/v1.0.0/mobilevit_xxs_cifar10.pth --update-labels managed-by=github-actions,commit-sha=b980baf3114ecc8081cb1b0d11bc43485858e8d4 --platform managed --format json --region us-central1
+Error: google-github-actions/deploy-cloudrun failed with: failed to execute gcloud command `gcloud run deploy object-classification-staging --quiet --image us-central1-docker.pkg.dev/fourth-memento-457220-f1/cloud-run-source-deploy/app:staging-b980baf3114ecc8081cb1b0d11bc43485858e8d4 --update-env-vars GCS_BUCKET_NAME=object-classification,MODEL_BLOB_NAME=prod/models/v1.0.0/mobilevit_xxs_cifar10.pth --update-labels managed-by=github-actions,commit-sha=b980baf3114ecc8081cb1b0d11bc43485858e8d4 --platform managed --format json --region us-central1`: Deploying container to Cloud Run service [object-classification-staging] in project [fourth-memento-457220-f1] region [us-central1]
+Deploying new service...
+Creating Revision........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................failed
+Deployment failed
+ERROR: (gcloud.run.deploy) Revision 'object-classification-staging-00001-nqp' is not ready and cannot serve traffic. The user-provided container failed to start and listen on the port defined provided by the PORT=8080 environment variable within the allocated timeout. This can happen when the container port is misconfigured or if the timeout is too short. The health check timeout can be extended. Logs for this revision might contain more information.
