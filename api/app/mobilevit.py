@@ -1,7 +1,14 @@
 import torch
 import torch.nn as nn
+from torchvision import transforms
 
 from einops import rearrange
+
+transform = transforms.Compose([
+    transforms.Resize((256, 256)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
 
 
 def conv_1x1_bn(inp, oup):
@@ -217,10 +224,10 @@ class MobileViT(nn.Module):
         return x
 
 
-def mobilevit_xxs():
+def mobilevit_xxs(num_classes=1000):
     dims = [64, 80, 96]
     channels = [16, 16, 24, 24, 48, 48, 64, 64, 80, 80, 320]
-    return MobileViT((256, 256), dims, channels, num_classes=1000, expansion=2)
+    return MobileViT((256, 256), dims, channels, num_classes=num_classes, expansion=2)
 
 
 def mobilevit_xs():

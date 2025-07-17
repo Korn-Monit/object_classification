@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from PIL import Image
 import io
 import os
+import torch
 from contextlib import asynccontextmanager
 from .model_loader import download_model_from_gcs, get_model
 from .mobilevit import transform
