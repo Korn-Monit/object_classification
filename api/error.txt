@@ -1,3 +1,4 @@
 Nested mappings are not allowed in compact mappings at line 30, column 12:
 
       run: echo "Repository name is: ${{ github.repository }}"
+           ^
