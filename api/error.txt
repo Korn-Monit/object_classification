@@ -1,3 +1,15 @@
-Run echo "Repository name is: Korn-Monit/object_classification
-/home/runner/work/_temp/15f7f45d-7b39-43e6-bbe0-687b6c332e3d.sh: line 1: unexpected EOF while looking for matching `"'
-Error: Process completed with exit code 2.
+Run gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+ERROR: (gcloud.auth.print-access-token) There was a problem refreshing your current auth tokens: ('Unable to acquire impersonated credentials', '{\n  "error": {\n    "code": 403,\n    "message": "Permission \'iam.serviceAccounts.getAccessToken\' denied on resource (or it may not exist).",\n    "status": "PERMISSION_DENIED",\n    "details": [\n      {\n        "@type": "type.googleapis.com/google.rpc.ErrorInfo",\n        "reason": "IAM_PERMISSION_DENIED",\n        "domain": "iam.googleapis.com",\n        "metadata": {\n          "permission": "iam.serviceAccounts.getAccessToken"\n        }\n      }\n    ]\n  }\n}\n')
+Please run:
+
+  $ gcloud auth login
+
+to obtain new credentials.
+
+If you have already logged in with a different account, run:
+
+  $ gcloud config set account ACCOUNT
+
+to select an already authenticated account to use.
+Error: Cannot perform an interactive login from a non TTY device
+Error: Process completed with exit code 1.
