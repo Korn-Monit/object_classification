@@ -1,6 +1,3 @@
-#12 ERROR: failed to push us-central1-docker.pkg.dev/fourth-memento-457220-f1/cloud-run-source-deploy/app:staging-33ee694e600cd6a2a406e95e976aba7fdf77f288: error getting credentials - err: exit status 1, out: ``
-------
- > exporting to image:
-------
-ERROR: failed to build: failed to solve: error getting credentials - err: exit status 1, out: ``
-Error: buildx failed with: ERROR: failed to build: failed to solve: error getting credentials - err: exit status 1, out: ``
+ERROR: (gcloud.auth.print-access-token) ('Error code invalid_grant: The audience in ID Token [https://iam.googleapis.com/projects/225654315168/locations/global/workloadIdentityPools/object-detection/providers/object-detection] does not match the expected audience https://github.com/Korn-Monit.', '{"error":"invalid_grant","error_description":"The audience in ID Token [https://iam.googleapis.com/projects/225654315168/locations/global/workloadIdentityPools/object-detection/providers/object-detection] does not match the expected audience https://github.com/Korn-Monit."}')
+Error: Cannot perform an interactive login from a non TTY device
+Error: Process completed with exit code 1.

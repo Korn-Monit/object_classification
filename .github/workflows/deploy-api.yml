@@ -32,9 +32,10 @@ jobs:
         # Replace with your Workload Identity Federation details
         workload_identity_provider: projects/225654315168/locations/global/workloadIdentityPools/object-detection/providers/object-detection
         service_account: github-actions-deploy@fourth-memento-457220-f1.iam.gserviceaccount.com
+        audience: 'https://github.com/Korn-Monit'
 
-    - name: Login to Artifact Registry
-      run: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://${{ env.REGION }}-docker.pkg.dev
+    - name: Configure Docker for GCP
+      run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
     - name: Set up Docker
       uses: docker/setup-buildx-action@v2
