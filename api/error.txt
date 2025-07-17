@@ -1,0 +1,6 @@
+#12 ERROR: failed to push us-central1-docker.pkg.dev/fourth-memento-457220-f1/cloud-run-source-deploy/app:staging-5f7b2702ac9bf8febd78c96cca7a391f76d1250f: failed to authorize: failed to fetch anonymous token: unexpected status from GET request to https://us-central1-docker.pkg.dev/v2/token?scope=repository%3Afourth-memento-457220-f1%2Fcloud-run-source-deploy%2Fapp%3Apull%2Cpush&service=us-central1-docker.pkg.dev: 403 Forbidden
+------
+ > exporting to image:
+------
+ERROR: failed to build: failed to solve: failed to fetch anonymous token: unexpected status from GET request to https://us-central1-docker.pkg.dev/v2/token?scope=repository%3Afourth-memento-457220-f1%2Fcloud-run-source-deploy%2Fapp%3Apull%2Cpush&service=us-central1-docker.pkg.dev: 403 Forbidden
+Error: buildx failed with: ERROR: failed to build: failed to solve: failed to fetch anonymous token: unexpected status from GET request to https://us-central1-docker.pkg.dev/v2/token?scope=repository%3Afourth-memento-457220-f1%2Fcloud-run-source-deploy%2Fapp%3Apull%2Cpush&service=us-central1-docker.pkg.dev: 403 Forbidden
