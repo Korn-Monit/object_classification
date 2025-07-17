@@ -26,10 +26,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: DEBUG - Print repository name
-      run: |
-        echo "Repository name is: ${{ github.repository }}
-
     - name: Setup GCP Auth
       uses: google-github-actions/auth@v1
       with:
