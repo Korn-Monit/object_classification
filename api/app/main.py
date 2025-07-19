@@ -25,6 +25,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/")
+def read_root():
+    """Root endpoint to welcome users."""
+    return {"message": "Welcome to the Object Classification API!"}
+
 @app.get("/health")
 def read_health():
     """Health check endpoint to confirm the service is running."""
