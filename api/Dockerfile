@@ -30,5 +30,5 @@ EXPOSE 8080
 # ENV MODEL_BLOB_NAME="path/to/your/model.pth"
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
