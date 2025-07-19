@@ -61,6 +61,7 @@ jobs:
         env_vars: |
           GCS_BUCKET_NAME=object-classification
           MODEL_BLOB_NAME=prod/models/v1.0.0/mobilevit_xxs_cifar10.pth
+        flags: --timeout=600
 
     - name: Run Integration Tests
       run: |
